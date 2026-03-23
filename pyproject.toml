@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hitem3d"
+version = "1.0.1"
+description = "ComfyUI custom nodes for Hitem3D Image-to-3D API: generate 3D models (GLB) from images."
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+classifiers = [
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[project.urls]
+Repository = "https://github.com/dev-hitem/hitem3d-comfyUI"
+"Bug Tracker" = "https://github.com/dev-hitem/hitem3d-comfyUI/issues"
+
+[tool.comfy]
+# PublisherId: create a publisher at https://registry.comfy.org/ (shown after @ on your profile). Change if yours differs from the org slug.
+PublisherId = "dev-hitem"
+DisplayName = "Hitem3D"
+# Optional square icon (max 400x400), e.g. raw.githubusercontent.com PNG/SVG
+# Icon = "https://raw.githubusercontent.com/dev-hitem/hitem3d-comfyUI/main/icon.png"
