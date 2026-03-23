@@ -348,6 +348,12 @@ class TextureNode(io.ComfyNode):
         if image is None:
             raise RuntimeError("image is required")
 
+        if model_task is not None:
+            if not ak and "ak" in model_task:
+                ak = model_task["ak"]
+            if not sk and "sk" in model_task:
+                sk = model_task["sk"]
+
         api, ak, sk = getHitem3dAPI(ak, sk)
 
         if model_task is not None:
@@ -362,8 +368,6 @@ class TextureNode(io.ComfyNode):
             mesh_url = await api.upload_file(mesh_path)
         else:
             raise RuntimeError("GLB or model_task is required")
-
-        print("mesh_url:", mesh_url)
         image_path = toImagePath(image, "image")
         result = await api.texture(image_path, mesh_url, model)
 
