@@ -1,6 +1,6 @@
-# hitem3d-comfyUI
+# Hi3D-comfyUI
 
-ComfyUI custom node package for [Hitem3D](https://www.hitem3d.ai/) Image-to-3D API. Generate high-quality 3D models from images using Hitem3D AI services.
+ComfyUI custom node package for [Hi3D](https://hi3d.ai/) Image-to-3D API. Generate high-quality 3D models from images using Hi3D AI services.
 
 ## Features
 
@@ -12,24 +12,24 @@ ComfyUI custom node package for [Hitem3D](https://www.hitem3d.ai/) Image-to-3D A
 
 ## Installation
 
-### Download from Hitem3D Website
+### Download from Hi3D Website
 
-1. Download the `hitem3d-comfyUI` archive from the [Hitem3D website](https://www.hitem3d.ai/) or the project releases page.
+1. Download the `Hi3D-comfyUI` archive from the [Hi3D website](https://hi3d.ai/) or the project releases page.
 2. Extract it into the `ComfyUI/custom_nodes` directory.
 3. Install Python dependencies via the **ComfyUI built-in terminal** (click the terminal icon in the ComfyUI Manager toolbar) or any terminal with the same Python environment:
 
 ```bash
-cd ComfyUI/custom_nodes/hitem3d-comfyUI
+cd ComfyUI/custom_nodes/Hi3D-comfyUI
 pip install -r requirements.txt
 ```
 
 ### ComfyUI Manager
 
-Search for `hitem3d` in [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) and install it directly.
+Search for `Hi3D` in [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) and install it directly.
 
 ## Configuration
 
-An API key pair (ak / sk) is required. Register at the [Hitem3D website](https://www.hitem3d.ai/) to obtain one.
+An API key pair (ak / sk) is required. Register at the [Hi3D website](https://hi3d.ai/) to obtain one.
 
 ### Option 1: config.json (Recommended)
 
@@ -37,23 +37,23 @@ Edit `config.json` in the node directory:
 
 ```json
 {
-    "hitem3d_ak": "your_access_key",
-    "hitem3d_sk": "your_secret_key"
+    "Hi3D_ak": "your_access_key",
+    "Hi3D_sk": "your_secret_key"
 }
 ```
 
 ### Option 2: Environment Variables
 
 ```bash
-export hitem3d_ak=your_access_key
-export hitem3d_sk=your_secret_key
+export Hi3D_ak=your_access_key
+export Hi3D_sk=your_secret_key
 ```
 
 > If ak/sk are configured via `config.json` or environment variables, the input fields on the nodes can be left empty.
 
 ## Nodes
 
-### hitem3d:ImageTo3D
+### Hi3D:ImageTo3D
 
 Generates a 3D model (GLB) from a single image or multi-view images.
 
@@ -66,16 +66,17 @@ Generates a 3D model (GLB) from a single image or multi-view images.
 | `image_left` | IMAGE | Left reference image (optional, for multi-view) |
 | `image_right` | IMAGE | Right reference image (optional, for multi-view) |
 | `texture` | BOOLEAN | Generate texture maps (default: `False`) |
+| `pbr` | BOOLEAN | PBR 开关（默认开启）。关闭=关闭，开启=开启。PBR需要 `texture=True`，且仅支持 `hitem3dv2.0` / `hitem3dv2.1`。 |
 | `scene` | COMBO | Scene preset: `general` / `portrait` |
 | `model` | COMBO | Model version (filtered by `scene`, see table below) |
-| `resolution` | COMBO | Generation resolution (filtered by `model`, see table below) |
-| `face` | INT | Target poly count (100,000–2,000,000; default: 500,000) |
+| `resolution` | COMBO | Generation resolution (filtered by `model`, default: `1024`, i.e. 1024³) |
+| `face` | INT | Target poly count (100,000–2,000,000, supports custom value). UI recommends by resolution: `512`→`500000`, `1024`→`1000000`, `1536/1536fast/1536pro/1536profast`→`2000000`. |
 
 **Scene → Model mapping:**
 
 | Scene | Available Models |
 |-------|-----------------|
-| `general` | `hitem3dv1.5`, `hitem3dv2.0` |
+| `general` | `hitem3dv1.5`, `hitem3dv2.0`, `hitem3dv2.1` |
 | `portrait` | `scene-portraitv1.5`, `scene-portraitv2.0`, `scene-portraitv2.1` |
 
 **Model → Resolution mapping:**
@@ -83,21 +84,22 @@ Generates a 3D model (GLB) from a single image or multi-view images.
 | Model | Available Resolutions |
 |-------|----------------------|
 | `hitem3dv1.5` | `512`, `1024`, `1536`, `1536pro` |
-| `hitem3dv2.0` | `1536`, `1536pro` |
+| `hitem3dv2.0` | `512`, `1024`, `1536`, `1536pro` |
+| `hitem3dv2.1` | `1536fast`, `1536pro` |
 | `scene-portraitv1.5` | `1536` |
 | `scene-portraitv2.0` | `1536pro` |
-| `scene-portraitv2.1` | `1536pro` |
+| `scene-portraitv2.1` | `1536profast`, `1536pro` |
 
 **Outputs:**
 
 | Output | Type | Description |
 |--------|------|-------------|
 | `GLB` | FILE3DGLB | Downloaded 3D model in GLB format |
-| `model_task` | HITEM3D_MODEL_TASK | Task info, can be passed to the Texture node |
+| `model_task` | HI3D_MODEL_TASK | Task info, can be passed to the Texture node |
 
 ---
 
-### hitem3d:Texture
+### Hi3D:Texture
 
 Regenerates texture maps for an existing 3D model based on a reference image.
 
@@ -107,8 +109,9 @@ Regenerates texture maps for an existing 3D model based on a reference image.
 | `sk` | STRING | API Secret Key (leave empty if configured globally) |
 | `GLB` | FILE3DGLB | Input 3D model in GLB format |
 | `image` | IMAGE | Texture reference image (**required**) |
-| `model_task` | HITEM3D_MODEL_TASK | Upstream task info from ImageTo3D (optional) |
-| `model` | COMBO | Model version: `hitem3dv1.5` / `scene-portraitv1.5` |
+| `model_task` | HI3D_MODEL_TASK | Upstream task info from ImageTo3D (optional) |
+| `model` | COMBO | Model version: `hitem3dv1.5` / `hitem3dv2.0` / `hitem3dv2.1` / `scene-portraitv1.5` |
+| `pbr` | BOOLEAN | PBR 开关（默认开启）。关闭=关闭，开启=开启。仅支持 `hitem3dv2.0` / `hitem3dv2.1`。 |
 
 > Provide either `model_task` **or** `GLB`. When `model_task` is connected, its model URL is used automatically without re-uploading.
 
@@ -116,7 +119,7 @@ Regenerates texture maps for an existing 3D model based on a reference image.
 
 ---
 
-### hitem3d:Load3DModel
+### Hi3D:Load3DModel
 
 Loads a GLB file from disk for use with the Texture node. Includes an **Upload GLB File** button to browse and upload files from your local computer.
 

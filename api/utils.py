@@ -206,7 +206,8 @@ class Hitem3dAPI:
         async with aiohttp.ClientSession() as session:
             return await self._fetch_access_token(session)
 
-    async def image_to_3d(self, image_path, request_type, face, model, resolution):
+    async def image_to_3d(self, image_path, request_type, face, model, resolution, pbr=None):
+        pbr_value = int(bool(pbr)) if pbr is not None else None
         async with aiohttp.ClientSession() as session:
             authorization = await self._get_authorization(session)
             data = {
@@ -215,6 +216,7 @@ class Hitem3dAPI:
                 "resolution": resolution,
                 "model": model,
                 "format": 2,
+                "pbr": pbr_value,
             }
             with open(image_path, "rb") as image_file:
                 files = {
@@ -234,7 +236,9 @@ class Hitem3dAPI:
         face,
         model,
         resolution,
+        pbr=None,
     ):
+        pbr_value = int(bool(pbr)) if pbr is not None else None
         async with aiohttp.ClientSession() as session:
             authorization = await self._get_authorization(session)
             data = {
@@ -244,6 +248,7 @@ class Hitem3dAPI:
                 "model": model,
                 "format": 2,
                 "multi_images_bit": multi_images_bit,
+                "pbr": pbr_value,
             }
             with ExitStack() as stack:
                 files = []
@@ -264,15 +269,24 @@ class Hitem3dAPI:
 
                 return await self._submit_and_wait(session, files, data, authorization)
 
-    async def texture(self, image_path, mesh_url, model):
+    async def texture(self, image_path, mesh_url, model, pbr=None):
+        pbr_value = int(bool(pbr)) if pbr is not None else None
         async with aiohttp.ClientSession() as session:
             authorization = await self._get_authorization(session)
+            # Texture node doesn't expose `resolution` in UI. Use model-specific defaults.
+            if model == "hitem3dv2.1":
+                texture_resolution = "1536fast"
+            elif model == "scene-portraitv2.1":
+                texture_resolution = "1536profast"
+            else:
+                texture_resolution = "512"
             data = {
                 "request_type": 2,
-                "resolution": 512,
+                "resolution": texture_resolution,
                 "model": model,
                 "format": 2,
                 "mesh_url": mesh_url,
+                "pbr": pbr_value,
             }
             with open(image_path, "rb") as image_file:
                 files = {
